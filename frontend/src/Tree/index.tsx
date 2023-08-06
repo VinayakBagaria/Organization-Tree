@@ -46,10 +46,8 @@ const Tree = ({ initialNodes, initialEdges }: ITreeProps) => {
 
   useEffect(() => {
     if (!isDragging) {
-      const {
-        nodes: layoutedNodes,
-        edges: layoutedEdges,
-      } = getLayoutedElements(nodes, edges);
+      const { nodes: layoutedNodes, edges: layoutedEdges } =
+        getLayoutedElements(nodes, edges);
       setNodes([...layoutedNodes]);
       setEdges([...layoutedEdges]);
     }

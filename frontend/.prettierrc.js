@@ -10,10 +10,6 @@ module.exports = {
       */
   singleQuote: true,
   /*
-        put > of a multi-line jsx element being alone on next line
-      */
-  jsxBracketSameLine: false,
-  /*
         trailing commas wherever valid in ES5, like in objs and arrays
       */
   trailingComma: 'es5',

@@ -1,11 +1,7 @@
 import { ChangeEvent, useCallback } from 'react';
 import { Handle, NodeProps, Position } from 'reactflow';
 
-const handleStyle = { left: 10 };
-
-interface ICustomNodeProps {
-  data: NodeProps;
-}
+interface ICustomNodeProps extends NodeProps<{ label: string }> {}
 
 function CustomNode({ data }: ICustomNodeProps) {
   const onChange = useCallback((evt: ChangeEvent<HTMLInputElement>) => {
@@ -14,8 +10,8 @@ function CustomNode({ data }: ICustomNodeProps) {
 
   return (
     <>
-      <Handle type="target" position={Position.Top} />
-      <p>Node at {data.id}</p>
+      <Handle type="target" position={Position.Top} isConnectable={false} />
+      <p>Node at {data.label}</p>
       <Handle type="source" position={Position.Bottom} id="a" />
     </>
   );

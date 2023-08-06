@@ -326,7 +326,7 @@ const TreeSimilar = () => {
       onConnect={onConnect}
       onNodeDrag={(_, node) => onNodeDrag(node)}
       onNodeDragStop={(_, node) => onNodeDragStop(node)}
-      // nodeTypes={nodeTypes}
+      nodeTypes={nodeTypes}
       fitView
     >
       <MiniMap />

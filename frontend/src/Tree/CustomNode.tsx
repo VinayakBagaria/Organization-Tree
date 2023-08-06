@@ -8,7 +8,6 @@ const CustomNode = ({ data }: ICustomNodeProps) => {
   return (
     <>
       <Handle type="target" position={Position.Top} isConnectable={false} />
-
       <Styles.NodeWrapper>
         <Styles.Image src={data.image} alt={data.first_name} />
         <Styles.DescriptionArea>

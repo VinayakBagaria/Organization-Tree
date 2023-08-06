@@ -1,32 +1,21 @@
-import React, {
-  useState,
-  useRef,
-  useCallback,
-  DragEventHandler,
-  useMemo,
-  useEffect,
-} from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import ReactFlow, {
-  ReactFlowProvider,
   addEdge,
   useNodesState,
   useEdgesState,
   MiniMap,
-  Controls,
   Background,
-  ReactFlowInstance,
   Connection,
   Edge,
   Node,
   useStoreApi,
   useReactFlow,
-  Position,
   ConnectionLineType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import CustomNode from './CustomNode';
 import { getLayoutedElements } from './utils';
-import { updateManagerForUser } from '../api';
+import { updateManagerForUser as updateManagerForUserApi } from '../api';
 
 interface IClosestNode {
   distance: number;
@@ -182,9 +171,7 @@ const Tree = ({ initialNodes, initialEdges }: ITreeProps) => {
           return previousEdges;
         }
 
-        console.log({ edgeToRealize });
-
-        updateManagerForUser(
+        updateManagerForUserApi(
           Number(edgeToRealize.target),
           Number(edgeToRealize.source)
         );

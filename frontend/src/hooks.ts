@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Edge, Node, ConnectionLineType } from 'reactflow';
 import { IOrganizationUser } from './types';
-import { fetchTree } from './api';
+import { fetchTreeApi } from './api';
 
 export function useFetchData() {
   const [isLoading, setIsLoading] = useState(true);
@@ -37,12 +37,12 @@ export function useFetchData() {
   useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
-      const responseUsers = await fetchTree();
+      const responseUsers = await fetchTreeApi();
       formatDataToDesiredType(responseUsers);
       setIsLoading(false);
     }
 
-    fetchData();
+    setTimeout(() => fetchData(), 2000);
   }, []);
 
   return {

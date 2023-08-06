@@ -1,3 +1,4 @@
+import { toast } from 'react-toastify';
 import { IOrganizationUser } from './types';
 
 const API_URL = process.env.REACT_APP_API_URL;
@@ -18,7 +19,7 @@ async function callApi<T>(path: string, method: 'GET' | 'PUT') {
   };
 }
 
-export async function fetchTree() {
+export async function fetchTreeApi() {
   if (!API_URL) {
     throw new Error('API url is not defined');
   }
@@ -26,6 +27,10 @@ export async function fetchTree() {
   const { json } = await callApi<Array<IOrganizationUser>>('/', 'GET');
   if (json === null) {
     throw new Error('Unexpected no data received');
+  }
+
+  if (json.data.length === 0) {
+    toast.error('No data');
   }
 
   return json.data;
@@ -44,6 +49,9 @@ export async function updateManagerForUser(
     'PUT'
   );
 
-  if (response.status === 400) {
+  if (response.status === 204) {
+    toast.success('Manager update done');
+  } else {
+    toast.error('Something failed');
   }
 }

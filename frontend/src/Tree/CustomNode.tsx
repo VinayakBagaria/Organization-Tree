@@ -1,20 +1,35 @@
-import { ChangeEvent, useCallback } from 'react';
 import { Handle, NodeProps, Position } from 'reactflow';
+import { IOrganizationUser } from '../types';
+import * as Styles from './styles';
 
-interface ICustomNodeProps extends NodeProps<{ label: string }> {}
+interface ICustomNodeProps extends NodeProps<IOrganizationUser> {}
 
-function CustomNode({ data }: ICustomNodeProps) {
-  const onChange = useCallback((evt: ChangeEvent<HTMLInputElement>) => {
-    console.log(evt.target.value);
-  }, []);
-
+const CustomNode = ({ data }: ICustomNodeProps) => {
   return (
     <>
       <Handle type="target" position={Position.Top} isConnectable={false} />
-      <p>Node at {data.label}</p>
+      <Styles.NodeWrapper>
+        <Styles.Image src={data.image} alt={data.first_name} />
+        <Styles.DescriptionArea>
+          <Styles.Name>
+            {data.first_name} {data.last_name}
+          </Styles.Name>
+          <Styles.OtherText>{data.designation}</Styles.OtherText>
+          {data.phone_number && (
+            <Styles.OtherText>
+              Tel: {data.country_code} {data.phone_number}
+            </Styles.OtherText>
+          )}
+          {data.email && (
+            <Styles.OtherText>
+              <a href={`mailto:${data.email}`}>{data.email}</a>
+            </Styles.OtherText>
+          )}
+        </Styles.DescriptionArea>
+      </Styles.NodeWrapper>
       <Handle type="source" position={Position.Bottom} id="a" />
     </>
   );
-}
+};
 
 export default CustomNode;

@@ -1,97 +1,229 @@
-import React, { useState, useRef, useCallback, DragEventHandler } from 'react';
+import React, {
+  useState,
+  useRef,
+  useCallback,
+  DragEventHandler,
+  useMemo,
+  useEffect,
+} from 'react';
 import ReactFlow, {
   ReactFlowProvider,
   addEdge,
   useNodesState,
   useEdgesState,
+  MiniMap,
   Controls,
+  Background,
   ReactFlowInstance,
   Connection,
+  Edge,
+  Node,
+  useStoreApi,
+  useReactFlow,
+  Position,
+  ConnectionLineType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import CustomNode from './CustomNode';
+import { getLayoutedElements } from './utils';
+import { updateManagerForUser } from '../api';
 
-const initialNodes = [
-  {
-    id: '1',
-    type: 'input',
-    data: { label: 'input node' },
-    position: { x: 250, y: 5 },
-  },
-];
+interface IClosestNode {
+  distance: number;
+  node: Node | null;
+}
 
-let id = 0;
-const getId = () => `dndnode_${id++}`;
+const ORIGINAL_CLOSEST_NODE: IClosestNode = {
+  distance: Number.MAX_VALUE,
+  node: null,
+};
 
-const Tree = () => {
-  const reactFlowWrapper = useRef<HTMLDivElement>(null);
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const [reactFlowInstance, setReactFlowInstance] = useState<ReactFlowInstance<
-    any,
-    any
-  > | null>(null);
+interface ITreeProps {
+  initialNodes: Array<Node>;
+  initialEdges: Array<Edge>;
+}
+
+const Tree = ({ initialNodes, initialEdges }: ITreeProps) => {
+  const { nodes: layoutedNodes, edges: layoutedEdges } = useMemo(
+    () => getLayoutedElements(initialNodes, initialEdges),
+    []
+  );
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
+  const store = useStoreApi();
+  const { getIntersectingNodes } = useReactFlow();
+  const nodeTypes = useMemo(() => ({ customNode: CustomNode }), []);
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    if (!isDragging) {
+      const { nodes: layoutedNodes, edges: layoutedEdges } =
+        getLayoutedElements(nodes, edges);
+      setNodes([...layoutedNodes]);
+      setEdges([...layoutedEdges]);
+    }
+  }, [isDragging]);
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges(eds => addEdge(params, eds)),
+    (params: Connection) =>
+      setEdges(eds =>
+        addEdge({ ...params, type: ConnectionLineType.SmoothStep }, eds)
+      ),
     []
   );
 
-  const onDragOver: DragEventHandler<HTMLDivElement> = useCallback(event => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'move';
-  }, []);
+  const getClosestEdge = useCallback(
+    (node: Node, alreadyTargetNodeIds: Set<string>) => {
+      const { nodeInternals } = store.getState();
+      const storeNodes = Array.from(nodeInternals.values());
 
-  const onDrop: DragEventHandler<HTMLDivElement> = useCallback(
-    event => {
-      event.preventDefault();
-      if (!reactFlowWrapper.current || !reactFlowInstance) {
-        return;
+      const closestNode = storeNodes.reduce((accumulator, eachNode) => {
+        if (eachNode.id === node.id) {
+          return accumulator;
+        }
+        if (
+          alreadyTargetNodeIds.size > 0 &&
+          alreadyTargetNodeIds.has(eachNode.id)
+        ) {
+          return accumulator;
+        }
+
+        const xDistance =
+          (eachNode.positionAbsolute?.x ?? 0) - (node.positionAbsolute?.x ?? 0);
+        const yDistance =
+          (eachNode.positionAbsolute?.y ?? 0) - (node.positionAbsolute?.y ?? 0);
+        const distanceBetweenNodes = Math.sqrt(
+          xDistance * xDistance + yDistance * yDistance
+        );
+        if (distanceBetweenNodes < accumulator.distance) {
+          accumulator.distance = distanceBetweenNodes;
+          accumulator.node = eachNode;
+        }
+        return accumulator;
+      }, ORIGINAL_CLOSEST_NODE);
+
+      if (!closestNode.node) {
+        return null;
       }
 
-      const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
-      const type = event.dataTransfer.getData('application/reactflow');
+      const isClosestNodeSource =
+        (closestNode.node.positionAbsolute?.x ?? 0) <
+        (node.positionAbsolute?.x ?? 0);
 
-      // check if the dropped element is valid
-      if (typeof type === 'undefined' || !type) {
-        return;
-      }
-
-      const position = reactFlowInstance.project({
-        x: event.clientX - reactFlowBounds.left,
-        y: event.clientY - reactFlowBounds.top,
-      });
-      const newNode = {
-        id: getId(),
-        type,
-        position,
-        data: { label: `${type} node` },
+      return {
+        id: `${node.id}-${closestNode.node.id}`,
+        source: isClosestNodeSource ? closestNode.node.id : node.id,
+        target: isClosestNodeSource ? node.id : closestNode.node.id,
+        className: '',
       };
-
-      setNodes(nds => nds.concat(newNode));
     },
-    [reactFlowInstance]
+    []
+  );
+
+  const onNodeDrag = useCallback(
+    (node: Node) => {
+      setIsDragging(true);
+      const intersections = getIntersectingNodes(node).map(
+        eachNode => eachNode.id
+      );
+      const alreadyTargetNodes = edges
+        .filter(eachEdge => eachEdge.source === node.id)
+        .map(eachEdge => eachEdge.target);
+
+      const closestEdge = getClosestEdge(node, new Set(alreadyTargetNodes));
+
+      if (!closestEdge) {
+        return;
+      }
+
+      if (!intersections.includes(closestEdge.source)) {
+        return;
+      }
+
+      setNodes(previousNodes =>
+        previousNodes.map(eachNode => ({
+          ...eachNode,
+          className: eachNode.id === closestEdge.source ? 'highlight' : '',
+        }))
+      );
+
+      setEdges(previousEdges => {
+        const nextEdges = previousEdges.filter(e => e.className !== 'temp');
+        nextEdges.push({
+          id: `${closestEdge.source}-${node.id}`,
+          source: closestEdge.source,
+          target: node.id,
+          className: 'temp',
+        });
+        return nextEdges;
+      });
+    },
+    [getClosestEdge, setEdges]
+  );
+
+  const onNodeDragStop = useCallback(
+    (node: Node) => {
+      setNodes(nodes =>
+        nodes.map(eachNode => ({
+          ...eachNode,
+          className: '',
+        }))
+      );
+
+      // delete edge where target is node but classname is not temp
+      // if there is no temp, then let it be
+      // cannot be a cycle
+      setEdges(previousEdges => {
+        // Since there is no temp edge, we have not modified the tree at all
+        const edgeToRealize = previousEdges.find(
+          eachEdge => eachEdge.className === 'temp'
+        );
+        if (!edgeToRealize) {
+          return previousEdges;
+        }
+
+        console.log({ edgeToRealize });
+
+        updateManagerForUser(
+          Number(edgeToRealize.target),
+          Number(edgeToRealize.source)
+        );
+
+        let validEdges: Array<Edge> = [];
+        for (const eachEdge of previousEdges) {
+          if (eachEdge.target === node.id && eachEdge.className !== 'temp') {
+            continue;
+          } else {
+            validEdges.push({
+              ...eachEdge,
+              className: '',
+              type: ConnectionLineType.SmoothStep,
+            });
+          }
+        }
+        return validEdges;
+      });
+
+      setIsDragging(false);
+    },
+    [getClosestEdge]
   );
 
   return (
-    <div className="dndflow">
-      <ReactFlowProvider>
-        <div className="reactflow-wrapper" ref={reactFlowWrapper}>
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onInit={setReactFlowInstance}
-            onDrop={onDrop}
-            onDragOver={onDragOver}
-            fitView
-          >
-            <Controls />
-          </ReactFlow>
-        </div>
-      </ReactFlowProvider>
-    </div>
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      onNodeDrag={(_, node) => onNodeDrag(node)}
+      onNodeDragStop={(_, node) => onNodeDragStop(node)}
+      nodeTypes={nodeTypes}
+      fitView
+    >
+      <MiniMap />
+      <Background />
+    </ReactFlow>
   );
 };
 

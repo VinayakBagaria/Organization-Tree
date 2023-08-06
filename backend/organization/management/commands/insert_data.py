@@ -7,7 +7,7 @@ from ...models import OrganizationUser
 USERS = [{
     'first_name': 'Mark',
     'last_name': 'Hill',
-    'image': 'https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60',
+    'image': 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Ym9zc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60',
     'designation': 'Chief Executive Officer',
     'country_code': '1',
     'phone_number': '49583033',

@@ -17,66 +17,44 @@ html, body {
     flex-direction: column;
 }
 
-.dndflow {
-    flex-direction: column;
-    display: flex;
-    flex-grow: 1;
-    height: 100%;
-  }
-  
-  .dndflow aside {
-    border-right: 1px solid #eee;
-    padding: 15px 10px;
-    font-size: 12px;
-    background: #fcfcfc;
-  }
-  
-  .dndflow aside .description {
-    margin-bottom: 10px;
-  }
-  
-  .dndflow .dndnode {
-    height: 20px;
-    padding: 4px;
-    border: 1px solid #1a192b;
-    border-radius: 2px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: grab;
-  }
-  
-  .dndflow .dndnode.input {
-    border-color: #0041d0;
-  }
-  
-  .dndflow .dndnode.output {
-    border-color: #ff0072;
-  }
-  
-  .dndflow .reactflow-wrapper {
-    flex-grow: 1;
-    height: 100%;
-  }
-  
-  .dndflow .selectall {
-    margin-top: 10px;
-  }
-  
-  @media screen and (min-width: 768px) {
-    .dndflow {
-      flex-direction: row;
-    }
-  
-    .dndflow aside {
-      width: 20%;
-      max-width: 250px;
-    }
-  }
-  
-
 
   .react-flow__node-default {
     width: 50px;
+  }
+
+  .react-flow__edge-path {
+    stroke: #333;
+    stroke-width: 2;
+  }
+  
+  .temp .react-flow__edge-path {
+    stroke: #bbb;
+    stroke-dasharray: 5 5;
+  }
+  
+
+  .react-flow__node.highlight {
+    background-color: #ff0072;
+    color: white;
+  }
+  
+  .intersection-flow .react-flow__node {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    border-radius: 1px;
+    border-width: 2px;
+    box-shadow: 6px 6px 0 1px rgba(0, 0, 0, 0.7);
+  }
+  
+  .intersection-flow .react-flow__node.selected,
+  .intersection-flow .react-flow__node:hover,
+  .intersection-flow .react-flow__node:focus {
+    box-shadow: 6px 6px 0 1px rgba(0, 0, 0, 0.7);
+    background-color: #eee;
+  }
+  
+  .intersection-flow .react-flow__handle {
+    display: none;
   }

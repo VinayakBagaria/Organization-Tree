@@ -20,7 +20,9 @@ server: ## runs the essential services env in Docker
 
 whole: ## runs the whole env in Docker
 	docker-compose down
-	docker-compose up
+	docker-compose up -d db
+	sleep 4
+	docker-compose up api
 
 exec: ## inside the backend terminal
 	docker-compose exec api bash

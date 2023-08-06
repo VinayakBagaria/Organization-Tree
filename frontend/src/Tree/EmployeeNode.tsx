@@ -3,9 +3,9 @@ import { Handle, NodeProps, Position } from 'reactflow';
 import { IOrganizationUser } from '../types';
 import * as Styles from './styles';
 
-interface ICustomNodeProps extends NodeProps<IOrganizationUser> {}
+interface IEmployeeNodeProps extends NodeProps<IOrganizationUser> {}
 
-const CustomNode = ({ data }: ICustomNodeProps) => {
+const EmployeeNode = ({ data }: IEmployeeNodeProps) => {
   return (
     <>
       <Handle type="target" position={Position.Top} isConnectable={false} />
@@ -33,4 +33,4 @@ const CustomNode = ({ data }: ICustomNodeProps) => {
   );
 };
 
-export default CustomNode;
+export default EmployeeNode;

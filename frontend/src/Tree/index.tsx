@@ -13,7 +13,7 @@ import ReactFlow, {
   ConnectionLineType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import CustomNode from './CustomNode';
+import EmployeeNode from './EmployeeNode';
 import { updateManagerForUserApi } from '../api';
 import { getLayoutedElements } from './utils';
 
@@ -41,7 +41,7 @@ const Tree = ({ initialNodes, initialEdges }: ITreeProps) => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
   const store = useStoreApi();
   const { getIntersectingNodes } = useReactFlow();
-  const nodeTypes = useMemo(() => ({ customNode: CustomNode }), []);
+  const nodeTypes = useMemo(() => ({ customNode: EmployeeNode }), []);
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {

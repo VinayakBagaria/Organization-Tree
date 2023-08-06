@@ -1,3 +1,4 @@
+import React from 'react';
 import { Handle, NodeProps, Position } from 'reactflow';
 import { IOrganizationUser } from '../types';
 import * as Styles from './styles';

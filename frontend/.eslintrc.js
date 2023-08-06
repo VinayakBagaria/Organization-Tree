@@ -5,41 +5,54 @@ const WARN = 1;
 // turns the rule on and make the linter fail
 const ERROR = 2;
 
-const MAX_CYCLOMATIC_COMPLEXITY = 100;
-const MAX_LINES_PER_FILE = 300;
-
 module.exports = {
+  env: {
+    browser: true,
+    es2021: true,
+  },
   extends: [
-    'airbnb',
-    'prettier',
-    'plugin:@typescript-eslint/eslint-recommended',
+    'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:react/recommended',
   ],
-  plugins: [
-    'react',
-    'jsx-a11y',
-    'import',
-    'prettier',
-    '@typescript-eslint',
-    'react-hooks',
+  overrides: [
+    {
+      env: {
+        node: true,
+      },
+      files: ['.eslintrc.{js,cjs}'],
+      parserOptions: {
+        sourceType: 'script',
+      },
+    },
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    // this setting is required to use rules that require type information
-    project: './tsconfig.json',
+    ecmaVersion: 'latest',
+    sourceType: 'module',
   },
-
-  // stop eslint from looking for a config file in parent folders
-  root: true,
+  plugins: ['@typescript-eslint', 'react'],
   rules: {
-    'prettier/prettier': OFF,
     camelcase: OFF,
-    // The prop validatin in react is disabled for now
-    'react/prop-types': OFF,
     /*
     If a JS object has a setter for a property, make sure there exists a getter property to read it. Reverse may not be true.
     */
     'accessor-pairs': OFF,
+    indent: [ERROR, 2],
+    'linebreak-style': [ERROR, 'unix'],
+    /*
+    allow use of single quotes wherever possible
+    avoidEscape: var double = "a string containing 'single' quotes"; is correct
+    */
+    quotes: [
+      ERROR,
+      'single',
+      {
+        avoidEscape: true,
+        allowTemplateLiterals: true,
+      },
+    ],
+    semi: [ERROR, 'always'],
     // allows omitting parens when there is only 1 arg
     'arrow-parens': [ERROR, 'as-needed'],
     // spacing before and after the arrow
@@ -85,37 +98,6 @@ module.exports = {
     Shadowing is the process by which a local variable shares the same name as a variable in its containing scope. Eliminate shadowed variables declarations.
     */
     'no-shadow': OFF,
-    '@typescript-eslint/no-shadow': [ERROR],
-    // note you must disable the base rule as it can report incorrect errors
-    'no-use-before-define': OFF,
-    '@typescript-eslint/no-use-before-define': [ERROR],
-    // all named args must be used, and there must be no unused variables
-    'no-unused-vars': [OFF],
-    '@typescript-eslint/no-unused-vars': [ERROR, { args: 'after-used' }],
-    'no-unused-expressions': OFF,
-    '@typescript-eslint/no-unused-expressions': ERROR,
-    // unnecessary to concatenate two strings together
-    'no-useless-concat': ERROR,
-    /*
-    allow use of single quotes wherever possible
-    avoidEscape: var double = "a string containing 'single' quotes"; is correct
-    */
-    quotes: [
-      ERROR,
-      'single',
-      {
-        avoidEscape: true,
-        allowTemplateLiterals: true,
-      },
-    ],
-    /*
-    applied on blocks that don't begin on a new line
-    ignore spacing b/w => and block - arrow-spacing
-    ignore spacing b/w a keyword and a block - keyword-spacing
-    */
-    'space-before-blocks': ERROR,
-    // always require a space b/w func name and (
-    'space-before-function-paren': ERROR,
     'react/jsx-no-bind': OFF,
     // React and JSX
     // not use ={true} when passing truthy values as props
@@ -131,10 +113,6 @@ module.exports = {
     Components without children can be self-closed to avoid unnecessary extra closing tag.
     */
     'import/prefer-default-export': OFF,
-    'import/no-extraneous-dependencies': [
-      ERROR,
-      { devDependencies: ['**/*.stories.tsx'] },
-    ],
     'react/button-has-type': ERROR,
     // If someone wants to pass children, use <Component><h1>My data</h1></Component> instead of <Component children={<h1>My data</h1>} />
     'react/no-children-prop': ERROR,
@@ -142,27 +120,9 @@ module.exports = {
     'react/no-unused-state': ERROR,
     // allow default values for unrequired props
     'react/default-props-match-prop-types': OFF,
-    // we need prop spreading; for icons especially
-    'react/jsx-props-no-spreading': OFF,
     'react/jsx-filename-extension': [
       ERROR,
       { extensions: ['.js', '.jsx', '.ts', '.tsx'] },
-    ],
-    // Checks rules of Hooks
-    'react-hooks/rules-of-hooks': ERROR,
-    // Checks effect dependencies
-    'react-hooks/exhaustive-deps': WARN,
-    'react/state-in-constructor': OFF,
-    'react/require-default-props': OFF,
-    'import/extensions': [
-      'error',
-      'ignorePackages',
-      {
-        js: 'never',
-        jsx: 'never',
-        ts: 'never',
-        tsx: 'never',
-      },
     ],
     'no-magic-numbers': [
       WARN,
@@ -172,12 +132,6 @@ module.exports = {
         ignore: [0, 1],
       },
     ],
-    'no-debugger': ERROR,
-    'no-sparse-arrays': ERROR,
-    'prefer-object-spread': ERROR,
-    'valid-typeof': ERROR,
-    'no-useless-constructor': OFF,
-    '@typescript-eslint/no-useless-constructor': ERROR,
     complexity: [WARN, MAX_CYCLOMATIC_COMPLEXITY],
     'max-lines': [ERROR, MAX_LINES_PER_FILE],
     // disable the requirement of a return type in functions
@@ -233,32 +187,5 @@ module.exports = {
     '@typescript-eslint/consistent-indexed-object-style': [ERROR, 'record'],
     '@typescript-eslint/consistent-type-definitions': [ERROR, 'interface'],
     'no-restricted-imports': OFF,
-    '@typescript-eslint/no-restricted-imports': [
-      ERROR,
-      {
-        name: 'react-redux',
-        importNames: ['useSelector'],
-        message: 'Use typed hooks `useTypedSelector` instead.',
-      },
-    ],
-  },
-  overrides: [
-    {
-      files: ['*.tsx', '*.ts'],
-      rules: {
-        eqeqeq: OFF,
-      },
-    },
-  ],
-  env: {
-    browser: true,
-  },
-  settings: {
-    'import/resolver': {
-      node: {
-        paths: ['src'],
-        extensions: ['.js', '.jsx', '.ts', '.tsx'],
-      },
-    },
   },
 };

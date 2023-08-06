@@ -36,7 +36,7 @@ export async function fetchTreeApi() {
   return json.data;
 }
 
-export async function updateManagerForUser(
+export async function updateManagerForUserApi(
   sourceUserId: IOrganizationUser['id'],
   targetUserId: IOrganizationUser['id']
 ) {

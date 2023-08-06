@@ -5,6 +5,7 @@ export const NodeWrapper = styled.div.attrs(() => ({
   className: 'd-flex',
 }))`
   border: 1px solid black;
+  border-radius: 4px;
   min-height: ${NODE_CONFIG.height}px;
   max-height: ${NODE_CONFIG.height}px;
   max-width: ${NODE_CONFIG.width}px;

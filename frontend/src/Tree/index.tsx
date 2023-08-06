@@ -14,8 +14,8 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import CustomNode from './CustomNode';
+import { updateManagerForUserApi } from '../api';
 import { getLayoutedElements } from './utils';
-import { updateManagerForUser as updateManagerForUserApi } from '../api';
 
 interface IClosestNode {
   distance: number;
@@ -46,8 +46,10 @@ const Tree = ({ initialNodes, initialEdges }: ITreeProps) => {
 
   useEffect(() => {
     if (!isDragging) {
-      const { nodes: layoutedNodes, edges: layoutedEdges } =
-        getLayoutedElements(nodes, edges);
+      const {
+        nodes: layoutedNodes,
+        edges: layoutedEdges,
+      } = getLayoutedElements(nodes, edges);
       setNodes([...layoutedNodes]);
       setEdges([...layoutedEdges]);
     }
@@ -152,6 +154,8 @@ const Tree = ({ initialNodes, initialEdges }: ITreeProps) => {
 
   const onNodeDragStop = useCallback(
     (node: Node) => {
+      setIsDragging(false);
+
       setNodes(nodes =>
         nodes.map(eachNode => ({
           ...eachNode,
@@ -190,8 +194,6 @@ const Tree = ({ initialNodes, initialEdges }: ITreeProps) => {
         }
         return validEdges;
       });
-
-      setIsDragging(false);
     },
     [getClosestEdge]
   );

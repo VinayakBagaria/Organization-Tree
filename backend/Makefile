@@ -24,10 +24,10 @@ whole: ## runs the whole env in Docker
 	sleep 4
 	docker-compose up api
 
-exec: ## inside the backend terminal
+exec: ## get inside the backend terminal
 	docker-compose exec api bash
 
-logs: ## logs of backend
+logs: ## get logs of backend
 	docker-compose logs -f api
 
 ## Service Commands
@@ -37,7 +37,10 @@ services: ## runs the main services required to start an api server: db
 
 
 test: ## runs the test cases
-	TEST_ENVIRONMENT=true pytest
+	docker-compose down
+	docker-compose up -d db
+	sleep 4
+	docker-compose run api python manage.py test
 
 
 ## Help Commands

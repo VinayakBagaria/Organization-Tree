@@ -13,6 +13,9 @@ class OrganizationUserService(metaclass=Singleton):
         return self._repository.get_all_users()
 
     def update_manager_for_user(self, source_user_id: int, target_user_id: int) -> Optional:
+        if source_user_id == target_user_id:
+            raise ExceptionCreator(message='Cannot become manager of itself')
+
         row_update_count = self._repository.update_manager_for_user(source_user_id, target_user_id)
         if row_update_count == 0:
             raise ExceptionCreator(message='Source user not found')

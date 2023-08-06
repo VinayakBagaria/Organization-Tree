@@ -1,9 +1,7 @@
-from django.db import IntegrityError
+from typing import List, Dict
 
-from backend.exception_handler import ExceptionCreator
 from backend.singleton import Singleton
 from ..models import OrganizationUser
-from typing import List, Dict
 
 
 class OrganizationUserRepository(metaclass=Singleton):
@@ -18,5 +16,5 @@ class OrganizationUserRepository(metaclass=Singleton):
         try:
             updates_count = self.Meta.model.objects.filter(id=source_user_id).update(manager_id=target_user_id)
             return updates_count
-        except IntegrityError:
+        except Exception:
             return -1

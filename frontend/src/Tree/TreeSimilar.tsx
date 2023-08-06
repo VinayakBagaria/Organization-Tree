@@ -19,9 +19,54 @@ import ReactFlow, {
   Node,
   useStoreApi,
   useReactFlow,
+  Position,
+  ConnectionLineType,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import dagre from 'dagre';
 import CustomNode from './CustomNode';
+
+const dagreGraph = new dagre.graphlib.Graph();
+dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+const nodeWidth = 60;
+const nodeHeight = 36;
+
+const getLayoutedElements = (
+  nodes: Array<Node>,
+  edges: Array<Edge>,
+  direction = 'TB'
+) => {
+  const isHorizontal = direction === 'LR';
+  dagreGraph.setGraph({ rankdir: direction });
+
+  nodes.forEach(node => {
+    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+  });
+
+  edges.forEach(edge => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  nodes.forEach(node => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    node.targetPosition = isHorizontal ? Position.Left : Position.Top;
+    node.sourcePosition = isHorizontal ? Position.Right : Position.Bottom;
+
+    // We are shifting the dagre node position (anchor=center center) to the top left
+    // so it matches the React Flow node anchor point (top left).
+    node.position = {
+      x: nodeWithPosition.x - nodeWidth / 2,
+      y: nodeWithPosition.y - nodeHeight / 2,
+    };
+
+    return node;
+  });
+
+  return { nodes, edges };
+};
 
 const initialNodes = [
   {
@@ -104,21 +149,35 @@ const initialEdges: Array<Edge> = [
   { id: 'e2-8', source: '2', target: '8', type: 'smoothstep' },
   { id: 'e3-6', source: '3', target: '6', type: 'smoothstep' },
   { id: 'e3-9', source: '3', target: '9', type: 'smoothstep' },
-  { id: 'e3-10', source: '3', target: '10', type: 'smoothstep' },
+  {
+    id: 'e3-10',
+    source: '3',
+    target: '10',
+    type: 'smoothstep',
+  },
   { id: 'e4-7', source: '4', target: '7', type: 'smoothstep' },
 ];
 
+const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+  initialNodes,
+  initialEdges
+);
+
 const TreeSimilar = () => {
   const store = useStoreApi();
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(layoutedNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(layoutedEdges);
+
   const nodeTypes = useMemo(() => ({ customNode: CustomNode }), []);
   const { getIntersectingNodes } = useReactFlow();
 
-  const onConnect = useCallback((params: Connection) => {
-    console.log('coonection');
-    setEdges(eds => addEdge(params, eds));
-  }, []);
+  const onConnect = useCallback(
+    (params: Connection) =>
+      setEdges(eds =>
+        addEdge({ ...params, type: ConnectionLineType.SmoothStep }, eds)
+      ),
+    []
+  );
 
   const getClosestEdge = useCallback(
     (node: Node, alreadyTargets: Set<string>) => {
@@ -247,6 +306,7 @@ const TreeSimilar = () => {
             validEdges.push({
               ...e,
               className: '',
+              type: ConnectionLineType.SmoothStep,
             });
           }
         }

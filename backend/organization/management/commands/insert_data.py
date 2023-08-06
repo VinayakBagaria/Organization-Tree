@@ -82,7 +82,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         print('Running script to insert data')
 
-        OrganizationUser.objects.all().hard_delete()
+        OrganizationUser.objects.all().delete()
         for user in USERS:
             self.__create_subusers(user, None)
 

@@ -35,6 +35,11 @@ services: ## runs the main services required to start an api server: db
 	docker-compose down
 	docker-compose up -d db
 
+fakedata: ## updates some fake data tree to the db
+	docker-compose down
+	docker-compose up -d db
+	sleep 4
+	docker-compose run api python manage.py insert_data
 
 test: ## runs the test cases
 	docker-compose down
